@@ -11,13 +11,13 @@ export default function TabLayout() {
     {
       name: '(home)',
       route: '/(tabs)/(home)/',
-      icon: 'heart.fill',
+      icon: 'magnifyingglass',
       label: 'Discover',
     },
     {
       name: 'likes',
       route: '/(tabs)/likes',
-      icon: 'heart.circle.fill',
+      icon: 'star.fill',
       label: 'Likes',
     },
     {
@@ -38,11 +38,11 @@ export default function TabLayout() {
     return (
       <NativeTabs>
         <NativeTabs.Trigger name="(home)">
-          <Icon sf="heart.fill" drawable="ic_home" />
+          <Icon sf="magnifyingglass" drawable="ic_home" />
           <Label>Discover</Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="likes">
-          <Icon sf="heart.circle.fill" drawable="ic_likes" />
+          <Icon sf="star.fill" drawable="ic_likes" />
           <Label>Likes</Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="matches">
