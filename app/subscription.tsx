@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { IconSymbol } from '@/components/IconSymbol';
+import { Stack, useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -9,31 +11,33 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { IconSymbol } from '@/components/IconSymbol';
-import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
+import { useThemeContext } from '@/contexts/ThemeContext';
+import { getThemedColors } from '@/styles/themedColors';
 
 export default function SubscriptionScreen() {
   const router = useRouter();
+  const { isDarkMode } = useThemeContext();
+  const colors = getThemedColors(isDarkMode);
 
   const handleSubscribe = () => {
     Alert.alert(
-      'Subscribe to Premium',
-      'You are about to subscribe to the yearly plan for $5.00/year. This is a demo - payment integration would be handled through your payment provider.',
+      'Subscribe',
+      'Subscribe to Premium for $5/year?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Continue',
+          text: 'Subscribe',
           onPress: () => {
-            console.log('Subscription initiated: yearly plan - $5.00');
-            Alert.alert('Success! 🎉', 'Welcome to Premium!', [
-              { text: 'OK', onPress: () => router.back() },
-            ]);
+            console.log('Subscription initiated');
+            Alert.alert('Success', 'Welcome to Premium! 🎉');
+            router.back();
           },
         },
       ]
     );
   };
+
+  const styles = createStyles(colors);
 
   return (
     <>
@@ -42,146 +46,148 @@ export default function SubscriptionScreen() {
           title: 'Premium Subscription',
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
-          presentation: 'modal',
+          presentation: 'card',
         }}
       />
       <ScrollView
-        style={[commonStyles.container, styles.container]}
-        contentContainerStyle={styles.scrollContent}
+        style={styles.container}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <IconSymbol name="star.fill" size={64} color={colors.accent} />
-          <Text style={styles.title}>Unlock Premium Features</Text>
-          <Text style={styles.subtitle}>
-            Get the most out of your dating experience
+          <IconSymbol name="star.fill" size={80} color={colors.accent} />
+          <Text style={styles.title}>Upgrade to Premium</Text>
+          <Text style={styles.subtitle}>Unlock all features and find your perfect match!</Text>
+        </View>
+
+        <View style={styles.priceCard}>
+          <Text style={styles.priceLabel}>Yearly Subscription</Text>
+          <View style={styles.priceRow}>
+            <Text style={styles.priceAmount}>$5</Text>
+            <Text style={styles.pricePeriod}>/year</Text>
+          </View>
+          <Text style={styles.priceDescription}>
+            Less than $0.42 per month!
           </Text>
         </View>
 
         <View style={styles.featuresContainer}>
+          <Text style={styles.featuresTitle}>Premium Features</Text>
+          
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <IconSymbol name="heart.fill" size={28} color={colors.primary} />
+              <IconSymbol name="heart.fill" size={24} color={colors.primary} />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Unlimited Likes</Text>
               <Text style={styles.featureDescription}>
-                Like as many profiles as you want without restrictions
+                Like as many profiles as you want without any restrictions
               </Text>
             </View>
           </View>
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <IconSymbol name="eye.fill" size={28} color={colors.secondary} />
+              <IconSymbol name="eye.fill" size={24} color={colors.primary} />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>See Who Likes You</Text>
               <Text style={styles.featureDescription}>
-                Know who&apos;s interested before you swipe
+                View everyone who has liked your profile instantly
               </Text>
             </View>
           </View>
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <IconSymbol name="video.fill" size={28} color={colors.accent} />
+              <IconSymbol name="video.fill" size={24} color={colors.primary} />
             </View>
             <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Video Chat</Text>
+              <Text style={styles.featureTitle}>Video Chat Access</Text>
               <Text style={styles.featureDescription}>
-                Connect face-to-face with your matches
+                Connect face-to-face with your matches through video calls
               </Text>
             </View>
           </View>
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <IconSymbol name="location.fill" size={28} color={colors.highlight} />
+              <IconSymbol name="sparkles" size={24} color={colors.primary} />
             </View>
             <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Advanced Filters</Text>
+              <Text style={styles.featureTitle}>Priority Matching</Text>
               <Text style={styles.featureDescription}>
-                Find exactly what you&apos;re looking for
+                Get shown to more people and increase your match rate
               </Text>
             </View>
           </View>
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <IconSymbol name="bolt.fill" size={28} color={colors.primary} />
+              <IconSymbol name="arrow.uturn.backward" size={24} color={colors.primary} />
             </View>
             <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Priority Likes</Text>
+              <Text style={styles.featureTitle}>Rewind Swipes</Text>
               <Text style={styles.featureDescription}>
-                Your profile gets shown first to others
+                Undo accidental left swipes and get a second chance
               </Text>
             </View>
           </View>
 
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <IconSymbol name="xmark.circle.fill" size={28} color={colors.textSecondary} />
+              <IconSymbol name="xmark.circle.fill" size={24} color={colors.primary} />
             </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Ad-Free Experience</Text>
               <Text style={styles.featureDescription}>
-                Enjoy uninterrupted browsing
+                Enjoy the app without any interruptions or advertisements
               </Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.plansContainer}>
-          <Text style={styles.plansTitle}>Premium Plan</Text>
-
-          <View style={styles.planCard}>
-            <View style={styles.planHeader}>
-              <View>
-                <Text style={styles.planName}>Yearly Plan</Text>
-                <Text style={styles.planSavings}>Best Value!</Text>
-              </View>
-              <View style={styles.planPriceContainer}>
-                <Text style={styles.planPrice}>$5.00</Text>
-                <Text style={styles.planPeriod}>/year</Text>
-              </View>
-            </View>
-            <Text style={styles.planDetails}>Just $0.42 per month</Text>
-            <View style={styles.selectedBadge}>
-              <IconSymbol name="checkmark.circle.fill" size={24} color={colors.primary} />
-            </View>
-          </View>
+        <View style={styles.guaranteeBox}>
+          <IconSymbol name="checkmark.shield.fill" size={32} color={colors.success} />
+          <Text style={styles.guaranteeText}>
+            Cancel anytime. No hidden fees. Secure payment.
+          </Text>
         </View>
 
-        <Pressable style={buttonStyles.primaryButton} onPress={handleSubscribe}>
-          <Text style={buttonStyles.buttonText}>
-            Subscribe - $5.00/year
-          </Text>
+        <Pressable style={styles.subscribeButton} onPress={handleSubscribe}>
+          <Text style={styles.subscribeButtonText}>Subscribe Now - $5/year</Text>
+        </Pressable>
+
+        <Pressable style={styles.cancelButton} onPress={() => router.back()}>
+          <Text style={styles.cancelButtonText}>Maybe Later</Text>
         </Pressable>
 
         <Text style={styles.disclaimer}>
-          Subscription automatically renews unless auto-renew is turned off at least 24 hours
-          before the end of the current period. Cancel anytime in your account settings.
+          By subscribing, you agree to our Terms of Service and Privacy Policy.
+          Subscription automatically renews unless cancelled at least 24 hours before
+          the end of the current period.
         </Text>
       </ScrollView>
     </>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: colors.background,
   },
-  scrollContent: {
+  content: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: Platform.OS === 'android' ? 100 : 40,
   },
   header: {
     alignItems: 'center',
     marginBottom: 32,
+    marginTop: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: '800',
     color: colors.text,
     marginTop: 16,
@@ -192,30 +198,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textSecondary,
     textAlign: 'center',
+    lineHeight: 24,
+  },
+  priceCard: {
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 32,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    boxShadow: '0px 8px 24px rgba(233, 30, 99, 0.2)',
+    elevation: 8,
+  },
+  priceLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 8,
+  },
+  priceAmount: {
+    fontSize: 56,
+    fontWeight: '800',
+    color: colors.primary,
+  },
+  pricePeriod: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginLeft: 4,
+  },
+  priceDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
   featuresContainer: {
-    marginBottom: 32,
+    marginBottom: 24,
+  },
+  featuresTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 20,
   },
   featureItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 20,
-    gap: 16,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
+    elevation: 2,
   },
   featureIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.card,
-    justifyContent: 'center',
+    backgroundColor: colors.background,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
   },
   featureContent: {
     flex: 1,
   },
   featureTitle: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: colors.text,
     marginBottom: 4,
   },
@@ -224,69 +281,58 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 20,
   },
-  plansContainer: {
-    marginBottom: 24,
-  },
-  plansTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 16,
-  },
-  planCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    position: 'relative',
-  },
-  planHeader: {
+  guaranteeBox: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.success,
   },
-  planName: {
+  guaranteeText: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  subscribeButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 18,
+    paddingHorizontal: 32,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    boxShadow: '0px 4px 16px rgba(233, 30, 99, 0.3)',
+    elevation: 4,
+  },
+  subscribeButtonText: {
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
-    marginBottom: 4,
   },
-  planSavings: {
-    fontSize: 14,
+  cancelButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  cancelButtonText: {
+    color: colors.textSecondary,
+    fontSize: 16,
     fontWeight: '600',
-    color: colors.primary,
-  },
-  planPriceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  planPrice: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  planPeriod: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginLeft: 4,
-  },
-  planDetails: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  selectedBadge: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
   },
   disclaimer: {
-    fontSize: 12,
+    fontSize: 11,
     color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 18,
-    marginTop: 16,
+    lineHeight: 16,
+    paddingHorizontal: 8,
   },
 });

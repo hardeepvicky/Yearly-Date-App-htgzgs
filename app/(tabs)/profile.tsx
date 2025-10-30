@@ -12,10 +12,13 @@ import {
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
-import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
+import { useThemeContext } from '@/contexts/ThemeContext';
+import { getThemedColors } from '@/styles/themedColors';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { isDarkMode } = useThemeContext();
+  const colors = getThemedColors(isDarkMode);
 
   const handleSubscribe = () => {
     router.push('/subscription');
@@ -26,7 +29,7 @@ export default function ProfileScreen() {
   };
 
   const handleSettings = () => {
-    Alert.alert('Settings', 'Settings feature coming soon!');
+    router.push('/settings');
   };
 
   const handleLogout = () => {
@@ -35,6 +38,8 @@ export default function ProfileScreen() {
       { text: 'Logout', style: 'destructive', onPress: () => console.log('Logged out') },
     ]);
   };
+
+  const styles = createStyles(colors);
 
   return (
     <>
@@ -53,7 +58,7 @@ export default function ProfileScreen() {
         />
       )}
       <ScrollView
-        style={[commonStyles.container, styles.container]}
+        style={[styles.container]}
         contentContainerStyle={[
           styles.scrollContent,
           Platform.OS === 'android' && styles.scrollContentAndroid,
@@ -99,8 +104,8 @@ export default function ProfileScreen() {
               <Text style={styles.featureText}>Ad-Free Experience</Text>
             </View>
           </View>
-          <Pressable style={buttonStyles.primaryButton} onPress={handleSubscribe}>
-            <Text style={buttonStyles.buttonText}>Subscribe Now - $99.99/year</Text>
+          <Pressable style={styles.subscribeButton} onPress={handleSubscribe}>
+            <Text style={styles.subscribeButtonText}>Subscribe Now - $5/year</Text>
           </Pressable>
         </View>
 
@@ -137,8 +142,10 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
+    flex: 1,
+    backgroundColor: colors.background,
     paddingTop: Platform.OS === 'android' ? 50 : 0,
   },
   scrollContent: {
@@ -223,6 +230,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.text,
     fontWeight: '500',
+  },
+  subscribeButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subscribeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   section: {
     marginBottom: 24,

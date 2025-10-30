@@ -1,16 +1,9 @@
 
 import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { lightColors } from './themedColors';
 
-export const colors = {
-  background: '#F5F5F5',
-  text: '#212121',
-  textSecondary: '#757575',
-  primary: '#E91E63',
-  secondary: '#9C27B0',
-  accent: '#03A9F4',
-  card: '#FFFFFF',
-  highlight: '#FF4081',
-};
+// Export colors for backward compatibility
+export const colors = lightColors;
 
 export const buttonStyles = StyleSheet.create({
   primaryButton: {
