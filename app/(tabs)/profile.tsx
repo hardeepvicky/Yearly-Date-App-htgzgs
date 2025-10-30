@@ -32,6 +32,10 @@ export default function ProfileScreen() {
     router.push('/settings');
   };
 
+  const handleHelpSupport = () => {
+    router.push('/help-support');
+  };
+
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -116,10 +120,7 @@ export default function ProfileScreen() {
             <Text style={styles.menuText}>Settings</Text>
             <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
           </Pressable>
-          <Pressable
-            style={styles.menuItem}
-            onPress={() => Alert.alert('Help', 'Help & Support coming soon!')}
-          >
+          <Pressable style={styles.menuItem} onPress={handleHelpSupport}>
             <IconSymbol name="questionmark.circle" size={24} color={colors.text} />
             <Text style={styles.menuText}>Help & Support</Text>
             <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
