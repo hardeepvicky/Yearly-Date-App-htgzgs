@@ -76,7 +76,6 @@ export default function SettingsScreen() {
   const colors = getThemedColors(isDarkMode);
   
   const [selectedCountry, setSelectedCountry] = useState('');
-  const [showCountryPicker, setShowCountryPicker] = useState(false);
 
   const handleThemeToggle = (value: boolean) => {
     setThemeMode(value ? 'dark' : 'light');
@@ -98,7 +97,7 @@ export default function SettingsScreen() {
           onPress: () => {
             Alert.alert(
               'Confirm Deletion',
-              'Please type DELETE to confirm account deletion',
+              'Please confirm that you want to delete your account permanently.',
               [
                 { text: 'Cancel', style: 'cancel' },
                 {
@@ -128,11 +127,14 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleCountrySelect = () => {
-    if (selectedCountry) {
-      const country = COUNTRIES.find(c => c.value === selectedCountry);
-      Alert.alert('Country Selected', `You selected: ${country?.label}`);
-    }
+  const handleBlockedUsers = () => {
+    console.log('Navigating to blocked users');
+    router.push('/blocked-users');
+  };
+
+  const handleSubscription = () => {
+    console.log('Navigating to subscription');
+    router.push('/subscription');
   };
 
   const styles = createStyles(colors);
@@ -239,25 +241,7 @@ export default function SettingsScreen() {
           
           <Pressable
             style={styles.settingCard}
-            onPress={() => Alert.alert('Privacy Settings', 'Privacy settings coming soon!')}
-          >
-            <View style={styles.settingRow}>
-              <View style={styles.settingLeft}>
-                <IconSymbol name="lock.fill" size={24} color={colors.primary} />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingTitle}>Privacy Settings</Text>
-                  <Text style={styles.settingDescription}>
-                    Manage your privacy preferences
-                  </Text>
-                </View>
-              </View>
-              <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={styles.settingCard}
-            onPress={() => Alert.alert('Blocked Users', 'Blocked users list coming soon!')}
+            onPress={handleBlockedUsers}
           >
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>
@@ -274,54 +258,13 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-        {/* Notifications Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
-          
-          <Pressable
-            style={styles.settingCard}
-            onPress={() => Alert.alert('Notifications', 'Notification settings coming soon!')}
-          >
-            <View style={styles.settingRow}>
-              <View style={styles.settingLeft}>
-                <IconSymbol name="bell.fill" size={24} color={colors.primary} />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingTitle}>Push Notifications</Text>
-                  <Text style={styles.settingDescription}>
-                    Manage notification preferences
-                  </Text>
-                </View>
-              </View>
-              <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
-            </View>
-          </Pressable>
-        </View>
-
         {/* Account Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-          
-          <Pressable
-            style={styles.settingCard}
-            onPress={() => Alert.alert('Account Info', 'Account information coming soon!')}
-          >
-            <View style={styles.settingRow}>
-              <View style={styles.settingLeft}>
-                <IconSymbol name="person.circle.fill" size={24} color={colors.primary} />
-                <View style={styles.settingTextContainer}>
-                  <Text style={styles.settingTitle}>Account Information</Text>
-                  <Text style={styles.settingDescription}>
-                    View and edit your account details
-                  </Text>
-                </View>
-              </View>
-              <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
-            </View>
-          </Pressable>
 
           <Pressable
             style={styles.settingCard}
-            onPress={() => Alert.alert('Subscription', 'Subscription management coming soon!')}
+            onPress={handleSubscription}
           >
             <View style={styles.settingRow}>
               <View style={styles.settingLeft}>

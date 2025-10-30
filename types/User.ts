@@ -8,6 +8,7 @@ export interface User {
   location: string;
   interests: string[];
   distance?: number;
+  isBlocked?: boolean;
 }
 
 export interface Match {
@@ -35,4 +36,12 @@ export interface Subscription {
   endDate: Date;
   price: number;
   active: boolean;
+}
+
+export interface BlockedUser {
+  id: string;
+  name: string;
+  photo: string;
+  blockedAt: Date;
+  reason?: string;
 }
