@@ -263,13 +263,8 @@ export default function PhotoUploadScreen() {
         await AsyncStorage.setItem('userProfile', JSON.stringify(completeProfile));
         await AsyncStorage.removeItem('tempUserInfo');
 
-        // Navigate to main app
-        Alert.alert('Success', 'Your profile has been created!', [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/(tabs)/(home)/'),
-          },
-        ]);
+        // Navigate to hobby selection screen
+        router.push('/choose-hobbies');
       }
     } catch (error) {
       console.error('Error saving profile:', error);

@@ -20,6 +20,7 @@ export const mockUsers: User[] = [
       latitude: 40.7580,
       longitude: -73.9855,
     },
+    country: 'United States',
   },
   {
     id: '2',
@@ -38,6 +39,7 @@ export const mockUsers: User[] = [
       latitude: 40.6782,
       longitude: -73.9442,
     },
+    country: 'United States',
   },
   {
     id: '3',
@@ -56,6 +58,7 @@ export const mockUsers: User[] = [
       latitude: 40.7831,
       longitude: -73.9712,
     },
+    country: 'United States',
   },
   {
     id: '4',
@@ -74,6 +77,7 @@ export const mockUsers: User[] = [
       latitude: 40.7282,
       longitude: -73.7949,
     },
+    country: 'Canada',
   },
   {
     id: '5',
@@ -92,6 +96,7 @@ export const mockUsers: User[] = [
       latitude: 40.7489,
       longitude: -73.9680,
     },
+    country: 'United States',
   },
   {
     id: '6',
@@ -110,6 +115,7 @@ export const mockUsers: User[] = [
       latitude: 40.7233,
       longitude: -74.0030,
     },
+    country: 'United Kingdom',
   },
   {
     id: '7',
@@ -128,6 +134,7 @@ export const mockUsers: User[] = [
       latitude: 40.7736,
       longitude: -73.9566,
     },
+    country: 'United States',
   },
   {
     id: '8',
@@ -146,6 +153,7 @@ export const mockUsers: User[] = [
       latitude: 40.7081,
       longitude: -73.9571,
     },
+    country: 'United States',
   },
   {
     id: '9',
@@ -164,6 +172,7 @@ export const mockUsers: User[] = [
       latitude: 40.7465,
       longitude: -74.0014,
     },
+    country: 'Australia',
   },
   {
     id: '10',
@@ -182,6 +191,7 @@ export const mockUsers: User[] = [
       latitude: 40.7336,
       longitude: -74.0027,
     },
+    country: 'United States',
   },
 ];
 

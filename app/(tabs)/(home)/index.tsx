@@ -24,7 +24,9 @@ import {
   filterUsersByGender,
   sortUsersByDistance,
   filterUsersByRadius,
+  filterUsersByCountry,
 } from '@/utils/locationUtils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 120;
@@ -39,6 +41,7 @@ export default function HomeScreen() {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
   const position = useRef(new Animated.ValueXY()).current;
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -46,9 +49,38 @@ export default function HomeScreen() {
     initializeLocation();
   }, []);
 
+  useEffect(() => {
+    // Listen for country changes
+    const loadCountry = async () => {
+      try {
+        const storedCountry = await AsyncStorage.getItem('selectedCountry');
+        if (storedCountry !== null) {
+          setSelectedCountry(storedCountry);
+          // Reload users with new country filter
+          if (userLocation) {
+            loadUsersWithLocation(userLocation.latitude, userLocation.longitude, storedCountry);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading country:', error);
+      }
+    };
+
+    // Load country on mount and when screen is focused
+    loadCountry();
+    const interval = setInterval(loadCountry, 1000); // Check for changes every second
+    return () => clearInterval(interval);
+  }, [userLocation]);
+
   const initializeLocation = async () => {
     try {
       console.log('Requesting location permissions...');
+      
+      // Load selected country
+      const storedCountry = await AsyncStorage.getItem('selectedCountry');
+      if (storedCountry) {
+        setSelectedCountry(storedCountry);
+      }
       
       // Request location permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -63,7 +95,8 @@ export default function HomeScreen() {
         // Use current user's mock location as fallback
         loadUsersWithLocation(
           currentUser.coordinates?.latitude || 40.7589,
-          currentUser.coordinates?.longitude || -73.9851
+          currentUser.coordinates?.longitude || -73.9851,
+          storedCountry || ''
         );
         setLoading(false);
         return;
@@ -83,7 +116,7 @@ export default function HomeScreen() {
       setUserLocation({ latitude, longitude });
 
       // Load and filter users based on location
-      loadUsersWithLocation(latitude, longitude);
+      loadUsersWithLocation(latitude, longitude, storedCountry || '');
     } catch (error) {
       console.error('Error getting location:', error);
       Alert.alert(
@@ -92,30 +125,39 @@ export default function HomeScreen() {
         [{ text: 'OK' }]
       );
       // Use mock location as fallback
+      const storedCountry = await AsyncStorage.getItem('selectedCountry');
       loadUsersWithLocation(
         currentUser.coordinates?.latitude || 40.7589,
-        currentUser.coordinates?.longitude || -73.9851
+        currentUser.coordinates?.longitude || -73.9851,
+        storedCountry || ''
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const loadUsersWithLocation = (latitude: number, longitude: number) => {
-    console.log('Loading users with location:', latitude, longitude);
+  const loadUsersWithLocation = (latitude: number, longitude: number, country: string = '') => {
+    console.log('Loading users with location:', latitude, longitude, 'country:', country);
     
-    // Filter users by gender (show females to male users)
+    // Filter users by gender (show opposite sex)
     let filteredUsers = filterUsersByGender(mockUsers, currentUser.gender);
     console.log('After gender filter:', filteredUsers.length, 'users');
 
-    // Filter users within radius
-    filteredUsers = filterUsersByRadius(
-      filteredUsers,
-      latitude,
-      longitude,
-      MAX_DISTANCE_KM
-    );
-    console.log('After radius filter:', filteredUsers.length, 'users');
+    // If country is selected, filter by country
+    if (country) {
+      filteredUsers = filterUsersByCountry(filteredUsers, country);
+      console.log('After country filter:', filteredUsers.length, 'users');
+      
+      // Also filter by nearby location within the country
+      filteredUsers = filterUsersByRadius(
+        filteredUsers,
+        latitude,
+        longitude,
+        MAX_DISTANCE_KM
+      );
+      console.log('After radius filter (within country):', filteredUsers.length, 'users');
+    }
+    // If no country selected, no additional filtering - show all opposite sex users
 
     // Sort by distance
     filteredUsers = sortUsersByDistance(filteredUsers, latitude, longitude);
@@ -254,11 +296,13 @@ export default function HomeScreen() {
         <View style={[commonStyles.container, styles.emptyContainer]}>
           <IconSymbol name="location.fill" size={64} color={colors.textSecondary} />
           <Text style={[commonStyles.title, { marginTop: 16 }]}>
-            No profiles nearby
+            No profiles found
           </Text>
           <Text style={[commonStyles.textSecondary, { textAlign: 'center', marginTop: 8 }]}>
-            There are no profiles within {MAX_DISTANCE_KM}km of your location.
-            {'\n'}Check back later for new matches!
+            {selectedCountry
+              ? `There are no profiles in ${selectedCountry} matching your criteria.\n`
+              : 'There are no profiles matching your criteria.\n'}
+            Try adjusting your filters in settings or check back later!
           </Text>
           <Pressable
             style={styles.retryButton}

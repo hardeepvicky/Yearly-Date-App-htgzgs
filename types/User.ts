@@ -14,6 +14,8 @@ export interface User {
     latitude: number;
     longitude: number;
   };
+  hobbies?: string[];
+  country?: string;
 }
 
 export interface Match {

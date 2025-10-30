@@ -86,3 +86,14 @@ export function filterUsersByRadius(
     return distance <= radiusKm;
   });
 }
+
+/**
+ * Filter users by country
+ */
+export function filterUsersByCountry(
+  users: any[],
+  country: string
+): any[] {
+  if (!country) return users;
+  return users.filter((user) => user.country === country);
+}

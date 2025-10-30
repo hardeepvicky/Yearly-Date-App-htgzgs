@@ -8,6 +8,7 @@ import {
   Switch,
   Alert,
   Platform,
+  Modal,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useThemeContext } from '@/contexts/ThemeContext';
@@ -15,6 +16,7 @@ import { Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { getThemedColors } from '@/styles/themedColors';
 import { IconSymbol } from '@/components/IconSymbol';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const COUNTRIES = [
   'United States',
@@ -31,6 +33,49 @@ const COUNTRIES = [
   'Brazil',
   'Mexico',
   'Other',
+];
+
+const HOBBIES = [
+  'Hiking',
+  'Coffee',
+  'Travel',
+  'Photography',
+  'Yoga',
+  'Cooking',
+  'Music',
+  'Art',
+  'Dogs',
+  'Wine',
+  'Reading',
+  'Dancing',
+  'Fitness',
+  'Technology',
+  'Running',
+  'Startups',
+  'Fashion',
+  'Design',
+  'Shopping',
+  'Cocktails',
+  'Law',
+  'Writing',
+  'Poetry',
+  'Movies',
+  'Gaming',
+  'Sports',
+  'Cycling',
+  'Swimming',
+  'Meditation',
+  'Volunteering',
+  'Painting',
+  'Singing',
+  'Guitar',
+  'Piano',
+  'Camping',
+  'Fishing',
+  'Surfing',
+  'Skiing',
+  'Snowboarding',
+  'Rock Climbing',
 ];
 
 const createStyles = (colors: ReturnType<typeof getThemedColors>) =>
@@ -147,14 +192,151 @@ const createStyles = (colors: ReturnType<typeof getThemedColors>) =>
     chevron: {
       marginLeft: 8,
     },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      maxHeight: '80%',
+      paddingTop: 20,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    modalCloseButton: {
+      padding: 8,
+    },
+    modalScrollContent: {
+      padding: 20,
+    },
+    hobbiesGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+    },
+    hobbyChip: {
+      backgroundColor: colors.card,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 20,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    hobbyChipSelected: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    hobbyText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: colors.text,
+    },
+    hobbyTextSelected: {
+      color: '#FFFFFF',
+    },
+    hobbiesPreview: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 6,
+      marginTop: 8,
+    },
+    hobbyPreviewChip: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    hobbyPreviewText: {
+      fontSize: 12,
+      color: '#FFFFFF',
+      fontWeight: '500',
+    },
   });
 
 export default function SettingsScreen() {
   const { theme, toggleTheme } = useThemeContext();
-  const [selectedCountry, setSelectedCountry] = useState('United States');
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
+  const [showHobbiesModal, setShowHobbiesModal] = useState(false);
   const router = useRouter();
   const colors = getThemedColors(theme);
   const styles = createStyles(colors);
+
+  React.useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const storedCountry = await AsyncStorage.getItem('selectedCountry');
+      const storedProfile = await AsyncStorage.getItem('userProfile');
+      
+      if (storedCountry) {
+        setSelectedCountry(storedCountry);
+      }
+      
+      if (storedProfile) {
+        const profile = JSON.parse(storedProfile);
+        if (profile.hobbies) {
+          setSelectedHobbies(profile.hobbies);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
+
+  const saveCountry = async (country: string) => {
+    try {
+      await AsyncStorage.setItem('selectedCountry', country);
+      setSelectedCountry(country);
+    } catch (error) {
+      console.error('Error saving country:', error);
+    }
+  };
+
+  const saveHobbies = async (hobbies: string[]) => {
+    try {
+      const storedProfile = await AsyncStorage.getItem('userProfile');
+      if (storedProfile) {
+        const profile = JSON.parse(storedProfile);
+        profile.hobbies = hobbies;
+        await AsyncStorage.setItem('userProfile', JSON.stringify(profile));
+        setSelectedHobbies(hobbies);
+      }
+    } catch (error) {
+      console.error('Error saving hobbies:', error);
+    }
+  };
+
+  const toggleHobby = (hobby: string) => {
+    let newHobbies: string[];
+    if (selectedHobbies.includes(hobby)) {
+      newHobbies = selectedHobbies.filter((h) => h !== hobby);
+    } else {
+      if (selectedHobbies.length >= 10) {
+        Alert.alert('Limit Reached', 'You can select up to 10 hobbies');
+        return;
+      }
+      newHobbies = [...selectedHobbies, hobby];
+    }
+    saveHobbies(newHobbies);
+  };
 
   const handleThemeToggle = (value: boolean) => {
     toggleTheme();
@@ -260,14 +442,66 @@ export default function SettingsScreen() {
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedCountry}
-                onValueChange={(itemValue) => setSelectedCountry(itemValue)}
+                onValueChange={(itemValue) => saveCountry(itemValue)}
                 style={styles.picker}
               >
+                <Picker.Item label="All Countries (No Filter)" value="" />
                 {COUNTRIES.map((country) => (
                   <Picker.Item key={country} label={country} value={country} />
                 ))}
               </Picker>
             </View>
+          </View>
+
+          {/* Hobbies */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Hobbies</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.settingItem,
+                pressed && styles.settingItemPressed,
+              ]}
+              onPress={() => setShowHobbiesModal(true)}
+            >
+              <View style={styles.settingLeft}>
+                <IconSymbol
+                  name="heart.fill"
+                  size={24}
+                  color={colors.primary}
+                  style={styles.settingIcon}
+                />
+                <View style={styles.settingTextContainer}>
+                  <Text style={styles.settingLabel}>Manage Hobbies</Text>
+                  <Text style={styles.settingDescription}>
+                    {selectedHobbies.length > 0
+                      ? `${selectedHobbies.length} hobbies selected`
+                      : 'No hobbies selected'}
+                  </Text>
+                  {selectedHobbies.length > 0 && (
+                    <View style={styles.hobbiesPreview}>
+                      {selectedHobbies.slice(0, 3).map((hobby) => (
+                        <View key={hobby} style={styles.hobbyPreviewChip}>
+                          <Text style={styles.hobbyPreviewText}>{hobby}</Text>
+                        </View>
+                      ))}
+                      {selectedHobbies.length > 3 && (
+                        <View style={styles.hobbyPreviewChip}>
+                          <Text style={styles.hobbyPreviewText}>
+                            +{selectedHobbies.length - 3}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              </View>
+              <IconSymbol
+                name="chevron-right"
+                size={20}
+                color={colors.textSecondary}
+                style={styles.chevron}
+              />
+            </Pressable>
           </View>
 
           {/* Account Management */}
@@ -382,6 +616,58 @@ export default function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Hobbies Modal */}
+      <Modal
+        visible={showHobbiesModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowHobbiesModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Your Hobbies</Text>
+              <Pressable
+                style={styles.modalCloseButton}
+                onPress={() => setShowHobbiesModal(false)}
+              >
+                <IconSymbol name="xmark" size={24} color={colors.text} />
+              </Pressable>
+            </View>
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={styles.modalScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.hobbiesGrid}>
+                {HOBBIES.map((hobby) => {
+                  const isSelected = selectedHobbies.includes(hobby);
+                  return (
+                    <Pressable
+                      key={hobby}
+                      style={[
+                        styles.hobbyChip,
+                        isSelected && styles.hobbyChipSelected,
+                      ]}
+                      onPress={() => toggleHobby(hobby)}
+                    >
+                      <Text
+                        style={[
+                          styles.hobbyText,
+                          isSelected && styles.hobbyTextSelected,
+                        ]}
+                      >
+                        {hobby}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
