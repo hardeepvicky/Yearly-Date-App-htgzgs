@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,24 +11,120 @@ import {
   PanResponder,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors, commonStyles } from '@/styles/commonStyles';
-import { mockUsers } from '@/data/mockUsers';
+import { mockUsers, currentUser } from '@/data/mockUsers';
 import { User } from '@/types/User';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Location from 'expo-location';
+import {
+  filterUsersByGender,
+  sortUsersByDistance,
+  filterUsersByRadius,
+} from '@/utils/locationUtils';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SWIPE_THRESHOLD = 120;
+const MAX_DISTANCE_KM = 50; // Maximum distance to show profiles
 
 export default function HomeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [users] = useState(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [locationPermission, setLocationPermission] = useState(false);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const position = useRef(new Animated.ValueXY()).current;
   const [photoIndex, setPhotoIndex] = useState(0);
 
-  const currentUser = users[currentIndex];
+  useEffect(() => {
+    initializeLocation();
+  }, []);
+
+  const initializeLocation = async () => {
+    try {
+      console.log('Requesting location permissions...');
+      
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
+        console.log('Location permission denied');
+        Alert.alert(
+          'Location Permission Required',
+          'This app needs location access to show you nearby profiles. Using default location.',
+          [{ text: 'OK' }]
+        );
+        // Use current user's mock location as fallback
+        loadUsersWithLocation(
+          currentUser.coordinates?.latitude || 40.7589,
+          currentUser.coordinates?.longitude || -73.9851
+        );
+        setLoading(false);
+        return;
+      }
+
+      setLocationPermission(true);
+      console.log('Location permission granted');
+
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      console.log('Current location:', location.coords);
+
+      const { latitude, longitude } = location.coords;
+      setUserLocation({ latitude, longitude });
+
+      // Load and filter users based on location
+      loadUsersWithLocation(latitude, longitude);
+    } catch (error) {
+      console.error('Error getting location:', error);
+      Alert.alert(
+        'Location Error',
+        'Could not get your location. Using default location.',
+        [{ text: 'OK' }]
+      );
+      // Use mock location as fallback
+      loadUsersWithLocation(
+        currentUser.coordinates?.latitude || 40.7589,
+        currentUser.coordinates?.longitude || -73.9851
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUsersWithLocation = (latitude: number, longitude: number) => {
+    console.log('Loading users with location:', latitude, longitude);
+    
+    // Filter users by gender (show females to male users)
+    let filteredUsers = filterUsersByGender(mockUsers, currentUser.gender);
+    console.log('After gender filter:', filteredUsers.length, 'users');
+
+    // Filter users within radius
+    filteredUsers = filterUsersByRadius(
+      filteredUsers,
+      latitude,
+      longitude,
+      MAX_DISTANCE_KM
+    );
+    console.log('After radius filter:', filteredUsers.length, 'users');
+
+    // Sort by distance
+    filteredUsers = sortUsersByDistance(filteredUsers, latitude, longitude);
+    console.log('Sorted by distance:', filteredUsers.length, 'users');
+
+    setUsers(filteredUsers);
+  };
+
+  const currentUserProfile = users[currentIndex];
 
   const panResponder = useRef(
     PanResponder.create({
@@ -52,19 +148,19 @@ export default function HomeScreen() {
   ).current;
 
   const handleSwipeRight = () => {
-    console.log('Liked:', currentUser?.name);
+    console.log('Liked:', currentUserProfile?.name);
     Animated.timing(position, {
       toValue: { x: SCREEN_WIDTH + 100, y: 0 },
       duration: 300,
       useNativeDriver: false,
     }).start(() => {
       nextCard();
-      Alert.alert('Match! 💕', `You liked ${currentUser?.name}!`);
+      Alert.alert('Match! 💕', `You liked ${currentUserProfile?.name}!`);
     });
   };
 
   const handleSwipeLeft = () => {
-    console.log('Passed:', currentUser?.name);
+    console.log('Passed:', currentUserProfile?.name);
     Animated.timing(position, {
       toValue: { x: -SCREEN_WIDTH - 100, y: 0 },
       duration: 300,
@@ -98,12 +194,60 @@ export default function HomeScreen() {
     extrapolate: 'clamp',
   });
 
-  if (!currentUser) {
+  if (loading) {
     return (
-      <View style={[commonStyles.container, styles.emptyContainer]}>
-        <Text style={commonStyles.title}>No more profiles!</Text>
-        <Text style={commonStyles.textSecondary}>Check back later for new matches</Text>
-      </View>
+      <>
+        {Platform.OS === 'ios' && (
+          <Stack.Screen
+            options={{
+              title: 'Discover',
+              headerStyle: { backgroundColor: colors.background },
+              headerTintColor: colors.text,
+            }}
+          />
+        )}
+        <View style={[commonStyles.container, styles.loadingContainer]}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[commonStyles.textSecondary, { marginTop: 16 }]}>
+            Finding nearby profiles...
+          </Text>
+        </View>
+      </>
+    );
+  }
+
+  if (!currentUserProfile || users.length === 0) {
+    return (
+      <>
+        {Platform.OS === 'ios' && (
+          <Stack.Screen
+            options={{
+              title: 'Discover',
+              headerStyle: { backgroundColor: colors.background },
+              headerTintColor: colors.text,
+            }}
+          />
+        )}
+        <View style={[commonStyles.container, styles.emptyContainer]}>
+          <IconSymbol name="location.fill" size={64} color={colors.textSecondary} />
+          <Text style={[commonStyles.title, { marginTop: 16 }]}>
+            No profiles nearby
+          </Text>
+          <Text style={[commonStyles.textSecondary, { textAlign: 'center', marginTop: 8 }]}>
+            There are no profiles within {MAX_DISTANCE_KM}km of your location.
+            {'\n'}Check back later for new matches!
+          </Text>
+          <Pressable
+            style={styles.retryButton}
+            onPress={() => {
+              setLoading(true);
+              initializeLocation();
+            }}
+          >
+            <Text style={styles.retryButtonText}>Refresh</Text>
+          </Pressable>
+        </View>
+      </>
     );
   }
 
@@ -134,7 +278,7 @@ export default function HomeScreen() {
             ]}
           >
             <Image
-              source={{ uri: currentUser.photos[photoIndex] }}
+              source={{ uri: currentUserProfile.photos[photoIndex] }}
               style={styles.image}
               resizeMode="cover"
             />
@@ -152,7 +296,7 @@ export default function HomeScreen() {
               style={styles.gradient}
             >
               <View style={styles.photoIndicators}>
-                {currentUser.photos.map((_, index) => (
+                {currentUserProfile.photos.map((_, index) => (
                   <View
                     key={index}
                     style={[
@@ -166,19 +310,23 @@ export default function HomeScreen() {
               <View style={styles.infoContainer}>
                 <View style={styles.nameRow}>
                   <Text style={styles.name}>
-                    {currentUser.name}, {currentUser.age}
+                    {currentUserProfile.name}, {currentUserProfile.age}
                   </Text>
-                  {currentUser.distance && (
+                  {currentUserProfile.distance !== undefined && (
                     <View style={styles.distanceContainer}>
                       <IconSymbol name="location.fill" size={16} color="#FFFFFF" />
-                      <Text style={styles.distance}>{currentUser.distance} km</Text>
+                      <Text style={styles.distance}>
+                        {currentUserProfile.distance < 1
+                          ? '<1 km'
+                          : `${currentUserProfile.distance} km`}
+                      </Text>
                     </View>
                   )}
                 </View>
-                <Text style={styles.location}>{currentUser.location}</Text>
-                <Text style={styles.bio}>{currentUser.bio}</Text>
+                <Text style={styles.location}>{currentUserProfile.location}</Text>
+                <Text style={styles.bio}>{currentUserProfile.bio}</Text>
                 <View style={styles.interestsContainer}>
-                  {currentUser.interests.map((interest, index) => (
+                  {currentUserProfile.interests.map((interest, index) => (
                     <View key={index} style={styles.interestTag}>
                       <Text style={styles.interestText}>{interest}</Text>
                     </View>
@@ -187,13 +335,13 @@ export default function HomeScreen() {
               </View>
             </LinearGradient>
 
-            {currentUser.photos.length > 1 && (
+            {currentUserProfile.photos.length > 1 && (
               <>
                 <Pressable
                   style={styles.photoNavLeft}
                   onPress={() =>
                     setPhotoIndex((prev) =>
-                      prev > 0 ? prev - 1 : currentUser.photos.length - 1
+                      prev > 0 ? prev - 1 : currentUserProfile.photos.length - 1
                     )
                   }
                 />
@@ -201,7 +349,7 @@ export default function HomeScreen() {
                   style={styles.photoNavRight}
                   onPress={() =>
                     setPhotoIndex((prev) =>
-                      prev < currentUser.photos.length - 1 ? prev + 1 : 0
+                      prev < currentUserProfile.photos.length - 1 ? prev + 1 : 0
                     )
                   }
                 />
@@ -241,10 +389,27 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: Platform.OS === 'android' ? 50 : 0,
   },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
   emptyContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  retryButton: {
+    marginTop: 24,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   cardContainer: {
     flex: 1,
@@ -319,11 +484,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   distance: {
     fontSize: 14,
     color: '#FFFFFF',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   location: {
     fontSize: 16,

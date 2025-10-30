@@ -9,6 +9,11 @@ export interface User {
   interests: string[];
   distance?: number;
   isBlocked?: boolean;
+  gender: 'male' | 'female';
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export interface Match {
