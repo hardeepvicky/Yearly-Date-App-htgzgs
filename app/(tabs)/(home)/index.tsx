@@ -130,9 +130,21 @@ export default function HomeScreen() {
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy });
+        // Only allow horizontal swipes, not taps
+        if (Math.abs(gesture.dx) > 5 || Math.abs(gesture.dy) > 5) {
+          position.setValue({ x: gesture.dx, y: gesture.dy });
+        }
       },
       onPanResponderRelease: (_, gesture) => {
+        // Check if it's a tap (minimal movement)
+        const isTap = Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5;
+        
+        if (isTap) {
+          // Handle tap to cycle photos
+          handlePhotoTap();
+          return;
+        }
+        
         if (gesture.dx > SWIPE_THRESHOLD) {
           handleSwipeRight();
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
@@ -146,6 +158,17 @@ export default function HomeScreen() {
       },
     })
   ).current;
+
+  const handlePhotoTap = () => {
+    if (currentUserProfile && currentUserProfile.photos.length > 1) {
+      setPhotoIndex((prev) => {
+        const nextIndex = prev + 1;
+        // Loop back to first photo if at the end
+        return nextIndex >= currentUserProfile.photos.length ? 0 : nextIndex;
+      });
+      console.log('Photo cycled to index:', photoIndex + 1);
+    }
+  };
 
   const handleSwipeRight = () => {
     console.log('Liked:', currentUserProfile?.name);
@@ -334,27 +357,6 @@ export default function HomeScreen() {
                 </View>
               </View>
             </LinearGradient>
-
-            {currentUserProfile.photos.length > 1 && (
-              <>
-                <Pressable
-                  style={styles.photoNavLeft}
-                  onPress={() =>
-                    setPhotoIndex((prev) =>
-                      prev > 0 ? prev - 1 : currentUserProfile.photos.length - 1
-                    )
-                  }
-                />
-                <Pressable
-                  style={styles.photoNavRight}
-                  onPress={() =>
-                    setPhotoIndex((prev) =>
-                      prev < currentUserProfile.photos.length - 1 ? prev + 1 : 0
-                    )
-                  }
-                />
-              </>
-            )}
           </Animated.View>
         </View>
 
@@ -452,20 +454,6 @@ const styles = StyleSheet.create({
   },
   photoIndicatorActive: {
     backgroundColor: '#FFFFFF',
-  },
-  photoNavLeft: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: '50%',
-    width: '40%',
-  },
-  photoNavRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: '50%',
-    width: '40%',
   },
   infoContainer: {
     gap: 8,

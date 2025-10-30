@@ -15,6 +15,12 @@ export default function TabLayout() {
       label: 'Discover',
     },
     {
+      name: 'likes',
+      route: '/(tabs)/likes',
+      icon: 'heart.circle.fill',
+      label: 'Likes',
+    },
+    {
       name: 'matches',
       route: '/(tabs)/matches',
       icon: 'message.fill',
@@ -34,6 +40,10 @@ export default function TabLayout() {
         <NativeTabs.Trigger name="(home)">
           <Icon sf="heart.fill" drawable="ic_home" />
           <Label>Discover</Label>
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="likes">
+          <Icon sf="heart.circle.fill" drawable="ic_likes" />
+          <Label>Likes</Label>
         </NativeTabs.Trigger>
         <NativeTabs.Trigger name="matches">
           <Icon sf="message.fill" drawable="ic_matches" />
@@ -56,6 +66,7 @@ export default function TabLayout() {
         }}
       >
         <Stack.Screen name="(home)" />
+        <Stack.Screen name="likes" />
         <Stack.Screen name="matches" />
         <Stack.Screen name="profile" />
       </Stack>
