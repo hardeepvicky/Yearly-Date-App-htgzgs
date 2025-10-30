@@ -36,6 +36,10 @@ export default function ProfileScreen() {
     router.push('/help-support');
   };
 
+  const handlePrivacyPolicy = () => {
+    router.push('/privacy-policy');
+  };
+
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -127,7 +131,7 @@ export default function ProfileScreen() {
           </Pressable>
           <Pressable
             style={styles.menuItem}
-            onPress={() => Alert.alert('Privacy', 'Privacy Policy coming soon!')}
+            onPress={handlePrivacyPolicy}
           >
             <IconSymbol name="lock.fill" size={24} color={colors.text} />
             <Text style={styles.menuText}>Privacy Policy</Text>
