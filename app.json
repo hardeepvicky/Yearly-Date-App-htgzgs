@@ -16,7 +16,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.Natively",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload profile pictures.",
+        "NSCameraUsageDescription": "This app needs access to your camera to take profile pictures."
       }
     },
     "android": {
@@ -25,7 +27,12 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.Natively"
+      "package": "com.anonymous.Natively",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/images/final_quest_240x240.png",
@@ -34,7 +41,14 @@
     "plugins": [
       "expo-font",
       "expo-router",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to upload profile pictures.",
+          "cameraPermission": "The app needs access to your camera to take profile pictures."
+        }
+      ]
     ],
     "scheme": "natively",
     "experiments": {

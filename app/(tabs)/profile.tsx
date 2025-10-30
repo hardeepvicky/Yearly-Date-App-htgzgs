@@ -40,10 +40,22 @@ export default function ProfileScreen() {
     router.push('/privacy-policy');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: () => console.log('Logged out') },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+            await AsyncStorage.removeItem('userProfile');
+            router.replace('/registration');
+          } catch (error) {
+            console.error('Error logging out:', error);
+          }
+        },
+      },
     ]);
   };
 

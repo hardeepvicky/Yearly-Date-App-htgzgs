@@ -23,7 +23,7 @@ import { ThemeProvider as AppThemeProvider } from "@/contexts/ThemeContext";
 SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)",
+  initialRouteName: "index",
 };
 
 export default function RootLayout() {
@@ -89,6 +89,30 @@ export default function RootLayout() {
             <WidgetProvider>
               <GestureHandlerRootView>
               <Stack>
+                {/* Index/Redirect Screen */}
+                <Stack.Screen 
+                  name="index" 
+                  options={{ headerShown: false }} 
+                />
+
+                {/* Registration Flow */}
+                <Stack.Screen 
+                  name="registration" 
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="complete-profile" 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="photo-upload" 
+                  options={{ headerShown: false }} 
+                />
+                <Stack.Screen 
+                  name="crop-photo" 
+                  options={{ headerShown: false }} 
+                />
+
                 {/* Main app with tabs */}
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
