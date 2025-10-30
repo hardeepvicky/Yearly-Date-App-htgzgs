@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -15,20 +15,17 @@ import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 
 export default function SubscriptionScreen() {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<'yearly' | 'monthly'>('yearly');
 
   const handleSubscribe = () => {
     Alert.alert(
       'Subscribe to Premium',
-      `You are about to subscribe to the ${selectedPlan} plan for ${
-        selectedPlan === 'yearly' ? '$99.99/year' : '$12.99/month'
-      }. This is a demo - payment integration would be handled through your payment provider.`,
+      'You are about to subscribe to the yearly plan for $5.00/year. This is a demo - payment integration would be handled through your payment provider.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Continue',
           onPress: () => {
-            console.log('Subscription initiated:', selectedPlan);
+            console.log('Subscription initiated: yearly plan - $5.00');
             Alert.alert('Success! 🎉', 'Welcome to Premium!', [
               { text: 'OK', onPress: () => router.back() },
             ]);
@@ -136,61 +133,29 @@ export default function SubscriptionScreen() {
         </View>
 
         <View style={styles.plansContainer}>
-          <Text style={styles.plansTitle}>Choose Your Plan</Text>
+          <Text style={styles.plansTitle}>Premium Plan</Text>
 
-          <Pressable
-            style={[
-              styles.planCard,
-              selectedPlan === 'yearly' && styles.planCardSelected,
-            ]}
-            onPress={() => setSelectedPlan('yearly')}
-          >
+          <View style={styles.planCard}>
             <View style={styles.planHeader}>
               <View>
                 <Text style={styles.planName}>Yearly Plan</Text>
-                <Text style={styles.planSavings}>Save 36%</Text>
+                <Text style={styles.planSavings}>Best Value!</Text>
               </View>
               <View style={styles.planPriceContainer}>
-                <Text style={styles.planPrice}>$99.99</Text>
+                <Text style={styles.planPrice}>$5.00</Text>
                 <Text style={styles.planPeriod}>/year</Text>
               </View>
             </View>
-            <Text style={styles.planDetails}>Just $8.33 per month</Text>
-            {selectedPlan === 'yearly' && (
-              <View style={styles.selectedBadge}>
-                <IconSymbol name="checkmark.circle.fill" size={24} color={colors.primary} />
-              </View>
-            )}
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.planCard,
-              selectedPlan === 'monthly' && styles.planCardSelected,
-            ]}
-            onPress={() => setSelectedPlan('monthly')}
-          >
-            <View style={styles.planHeader}>
-              <View>
-                <Text style={styles.planName}>Monthly Plan</Text>
-              </View>
-              <View style={styles.planPriceContainer}>
-                <Text style={styles.planPrice}>$12.99</Text>
-                <Text style={styles.planPeriod}>/month</Text>
-              </View>
+            <Text style={styles.planDetails}>Just $0.42 per month</Text>
+            <View style={styles.selectedBadge}>
+              <IconSymbol name="checkmark.circle.fill" size={24} color={colors.primary} />
             </View>
-            <Text style={styles.planDetails}>Billed monthly</Text>
-            {selectedPlan === 'monthly' && (
-              <View style={styles.selectedBadge}>
-                <IconSymbol name="checkmark.circle.fill" size={24} color={colors.primary} />
-              </View>
-            )}
-          </Pressable>
+          </View>
         </View>
 
         <Pressable style={buttonStyles.primaryButton} onPress={handleSubscribe}>
           <Text style={buttonStyles.buttonText}>
-            Subscribe - {selectedPlan === 'yearly' ? '$99.99/year' : '$12.99/month'}
+            Subscribe - $5.00/year
           </Text>
         </Pressable>
 
@@ -274,11 +239,8 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 12,
     borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-  },
-  planCardSelected: {
     borderColor: colors.primary,
+    position: 'relative',
   },
   planHeader: {
     flexDirection: 'row',
