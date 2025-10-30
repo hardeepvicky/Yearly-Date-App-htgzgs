@@ -1,91 +1,265 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, Platform } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { IconSymbol } from "@/components/IconSymbol";
-import { GlassView } from "expo-glass-effect";
-import { useTheme } from "@react-navigation/native";
+
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  Image,
+  Platform,
+  Alert,
+} from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import { IconSymbol } from '@/components/IconSymbol';
+import { colors, commonStyles, buttonStyles } from '@/styles/commonStyles';
 
 export default function ProfileScreen() {
-  const theme = useTheme();
+  const router = useRouter();
+
+  const handleSubscribe = () => {
+    router.push('/subscription');
+  };
+
+  const handleEditProfile = () => {
+    Alert.alert('Edit Profile', 'Profile editing feature coming soon!');
+  };
+
+  const handleSettings = () => {
+    Alert.alert('Settings', 'Settings feature coming soon!');
+  };
+
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: () => console.log('Logged out') },
+    ]);
+  };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]} edges={['top']}>
+    <>
+      {Platform.OS === 'ios' && (
+        <Stack.Screen
+          options={{
+            title: 'Profile',
+            headerStyle: { backgroundColor: colors.background },
+            headerTintColor: colors.text,
+            headerRight: () => (
+              <Pressable onPress={handleSettings} style={{ padding: 8 }}>
+                <IconSymbol name="gear" size={24} color={colors.text} />
+              </Pressable>
+            ),
+          }}
+        />
+      )}
       <ScrollView
-        style={styles.container}
+        style={[commonStyles.container, styles.container]}
         contentContainerStyle={[
-          styles.contentContainer,
-          Platform.OS !== 'ios' && styles.contentContainerWithTabBar
+          styles.scrollContent,
+          Platform.OS === 'android' && styles.scrollContentAndroid,
         ]}
+        showsVerticalScrollIndicator={false}
       >
-        <GlassView style={[
-          styles.profileHeader,
-          Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-        ]} glassEffectStyle="regular">
-          <IconSymbol name="person.circle.fill" size={80} color={theme.colors.primary} />
-          <Text style={[styles.name, { color: theme.colors.text }]}>John Doe</Text>
-          <Text style={[styles.email, { color: theme.dark ? '#98989D' : '#666' }]}>john.doe@example.com</Text>
-        </GlassView>
+        <View style={styles.header}>
+          <Image
+            source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400' }}
+            style={styles.profileImage}
+          />
+          <Text style={styles.name}>John Doe</Text>
+          <Text style={styles.age}>32 years old</Text>
+          <Pressable style={styles.editButton} onPress={handleEditProfile}>
+            <IconSymbol name="pencil" size={16} color={colors.primary} />
+            <Text style={styles.editButtonText}>Edit Profile</Text>
+          </Pressable>
+        </View>
 
-        <GlassView style={[
-          styles.section,
-          Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-        ]} glassEffectStyle="regular">
-          <View style={styles.infoRow}>
-            <IconSymbol name="phone.fill" size={20} color={theme.dark ? '#98989D' : '#666'} />
-            <Text style={[styles.infoText, { color: theme.colors.text }]}>+1 (555) 123-4567</Text>
+        <View style={styles.premiumCard}>
+          <View style={styles.premiumHeader}>
+            <IconSymbol name="star.fill" size={32} color={colors.accent} />
+            <Text style={styles.premiumTitle}>Upgrade to Premium</Text>
           </View>
-          <View style={styles.infoRow}>
-            <IconSymbol name="location.fill" size={20} color={theme.dark ? '#98989D' : '#666'} />
-            <Text style={[styles.infoText, { color: theme.colors.text }]}>San Francisco, CA</Text>
+          <Text style={styles.premiumDescription}>
+            Get unlimited likes, see who likes you, and unlock exclusive features!
+          </Text>
+          <View style={styles.premiumFeatures}>
+            <View style={styles.featureRow}>
+              <IconSymbol name="checkmark.circle.fill" size={20} color={colors.primary} />
+              <Text style={styles.featureText}>Unlimited Likes</Text>
+            </View>
+            <View style={styles.featureRow}>
+              <IconSymbol name="checkmark.circle.fill" size={20} color={colors.primary} />
+              <Text style={styles.featureText}>See Who Likes You</Text>
+            </View>
+            <View style={styles.featureRow}>
+              <IconSymbol name="checkmark.circle.fill" size={20} color={colors.primary} />
+              <Text style={styles.featureText}>Video Chat Access</Text>
+            </View>
+            <View style={styles.featureRow}>
+              <IconSymbol name="checkmark.circle.fill" size={20} color={colors.primary} />
+              <Text style={styles.featureText}>Ad-Free Experience</Text>
+            </View>
           </View>
-        </GlassView>
+          <Pressable style={buttonStyles.primaryButton} onPress={handleSubscribe}>
+            <Text style={buttonStyles.buttonText}>Subscribe Now - $99.99/year</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          <Pressable style={styles.menuItem} onPress={handleSettings}>
+            <IconSymbol name="gear" size={24} color={colors.text} />
+            <Text style={styles.menuText}>Settings</Text>
+            <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
+          </Pressable>
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => Alert.alert('Help', 'Help & Support coming soon!')}
+          >
+            <IconSymbol name="questionmark.circle" size={24} color={colors.text} />
+            <Text style={styles.menuText}>Help & Support</Text>
+            <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
+          </Pressable>
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => Alert.alert('Privacy', 'Privacy Policy coming soon!')}
+          >
+            <IconSymbol name="lock.fill" size={24} color={colors.text} />
+            <Text style={styles.menuText}>Privacy Policy</Text>
+            <IconSymbol name="chevron.right" size={20} color={colors.textSecondary} />
+          </Pressable>
+        </View>
+
+        <Pressable style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    // backgroundColor handled dynamically
-  },
   container: {
-    flex: 1,
+    paddingTop: Platform.OS === 'android' ? 50 : 0,
   },
-  contentContainer: {
-    padding: 20,
+  scrollContent: {
+    padding: 16,
   },
-  contentContainerWithTabBar: {
-    paddingBottom: 100, // Extra padding for floating tab bar
+  scrollContentAndroid: {
+    paddingBottom: 100,
   },
-  profileHeader: {
+  header: {
     alignItems: 'center',
-    borderRadius: 12,
-    padding: 32,
+    marginBottom: 24,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     marginBottom: 16,
-    gap: 12,
+    borderWidth: 4,
+    borderColor: colors.primary,
   },
   name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    // color handled dynamically
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 4,
   },
-  email: {
+  age: {
     fontSize: 16,
-    // color handled dynamically
+    color: colors.textSecondary,
+    marginBottom: 12,
   },
-  section: {
-    borderRadius: 12,
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  editButtonText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  premiumCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
     padding: 20,
-    gap: 12,
+    marginBottom: 24,
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+    elevation: 4,
   },
-  infoRow: {
+  premiumHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  premiumTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  premiumDescription: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  premiumFeatures: {
+    gap: 12,
+    marginBottom: 20,
+  },
+  featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  infoText: {
+  featureText: {
+    fontSize: 15,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 8,
+    gap: 12,
+  },
+  menuText: {
+    flex: 1,
     fontSize: 16,
-    // color handled dynamically
+    color: colors.text,
+    fontWeight: '500',
+  },
+  logoutButton: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.highlight,
+    marginBottom: 20,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.highlight,
   },
 });
